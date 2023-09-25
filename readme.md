@@ -1,4 +1,4 @@
-[![Release](https://jitpack.io/v/tony-xlh/docscan4j.svg)]
+![Release](https://jitpack.io/v/tony-xlh/docscan4j.svg)
 (https://jitpack.io/#tony-xlh/docscan4j)
 
 ## docscan4j
