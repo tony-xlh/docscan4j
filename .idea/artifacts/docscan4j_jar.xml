@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="docscan4j:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/docscan4j_jar</output-path>
+    <root id="archive" name="docscan4j.jar">
+      <element id="module-output" name="docscan4j" />
+    </root>
+  </artifact>
+</component>
