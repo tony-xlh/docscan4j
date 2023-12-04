@@ -12,8 +12,8 @@ import java.util.Map;
 import okhttp3.*;
 
 public class DynamsoftService {
-    private String endPoint = "http://127.0.0.1:18622";
-    private String license = "";
+    public String endPoint = "http://127.0.0.1:18622";
+    public String license = "";
     private static final MediaType JSON
             = MediaType.get("application/json; charset=utf-8");
     public DynamsoftService(){
