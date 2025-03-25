@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.*;
 
@@ -27,7 +28,7 @@ public class DynamsoftService {
     public List<Scanner> getScanners() throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url(endPoint+"/DWTAPI/Scanners")
+                .url(endPoint+"/api/device/scanners")
                 .build();
         try (Response response = client.newCall(request).execute()) {
             String body = response.body().string();
@@ -52,7 +53,6 @@ public class DynamsoftService {
 
     public String createScanJob(Scanner scanner,DeviceConfiguration config,Capabilities capabilities) throws Exception {
         Map<String,Object> body = new HashMap<String,Object>();
-        body.put("license",this.license);
         body.put("device",scanner.device);
         if (config != null) {
             body.put("config",config);
@@ -63,15 +63,39 @@ public class DynamsoftService {
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonBody = objectMapper.writeValueAsString(body);
 
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(120, TimeUnit.SECONDS)
+                .build();
         RequestBody requestBody = RequestBody.create(jsonBody, JSON);
         Request request = new Request.Builder()
-                .url(endPoint+"/DWTAPI/ScanJobs")
+                .url(endPoint+"/api/device/scanners/jobs")
+                .addHeader("X-DICS-LICENSE-KEY", this.license)
                 .post(requestBody)
                 .build();
         try (Response response = client.newCall(request).execute()) {
             if (response.code() == 201) {
-                return response.body().string();
+                String responseBody = response.body().string();
+                ObjectMapper resultMapper = new ObjectMapper();
+                Map<String,Object> parsed = resultMapper.readValue(responseBody,new TypeReference<Map<String,Object>>() {});
+                return (String) parsed.get("jobuid");
+            }else{
+                throw new Exception(response.body().string());
+            }
+        }
+    }
+
+    public boolean deleteJob(String jobID) throws Exception {
+        OkHttpClient client = new OkHttpClient().newBuilder()
+                .build();
+        MediaType mediaType = MediaType.parse("text/plain");
+        RequestBody body = RequestBody.create(mediaType, "");
+        Request request = new Request.Builder()
+                .url(endPoint+"/api/device/scanners/jobs/"+jobID)
+                .method("DELETE", body)
+                .build();
+        try (Response response = client.newCall(request).execute()) {
+            if (response.code() == 204) {
+                return true;
             }else{
                 throw new Exception(response.body().string());
             }
@@ -83,18 +107,19 @@ public class DynamsoftService {
     }
 
     private byte[] getImage(String jobID) throws Exception {
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(endPoint+"/DWTAPI/ScanJobs/"+jobID+"/NextDocument")
+        System.out.println(endPoint+"/api/scanners/jobs/"+jobID+"/next-page");
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(120, TimeUnit.SECONDS)
                 .build();
-        String body = "";
+        Request request = new Request.Builder()
+                .url(endPoint+"/api/device/scanners/jobs/"+jobID+"/next-page")
+                .build();
         try (Response response = client.newCall(request).execute()) {
             if (response.code() == 200) {
                 return response.body().bytes();
             }else{
-                return null;
+                throw new Exception(response.body().string());
             }
-
         }
     }
 }
