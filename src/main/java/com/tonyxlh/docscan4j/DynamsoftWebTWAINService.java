@@ -12,15 +12,15 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.*;
 
-public class DynamsoftService {
+public class DynamsoftWebTWAINService {
     public String endPoint = "http://127.0.0.1:18622";
     public String license = "";
     private static final MediaType JSON
             = MediaType.get("application/json; charset=utf-8");
-    public DynamsoftService(){
+    public DynamsoftWebTWAINService(){
 
     }
-    public DynamsoftService(String endPoint, String license){
+    public DynamsoftWebTWAINService(String endPoint, String license){
         this.endPoint = endPoint;
         this.license = license;
     }
@@ -107,7 +107,6 @@ public class DynamsoftService {
     }
 
     private byte[] getImage(String jobID) throws Exception {
-        System.out.println(endPoint+"/api/scanners/jobs/"+jobID+"/next-page");
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(120, TimeUnit.SECONDS)
                 .build();
